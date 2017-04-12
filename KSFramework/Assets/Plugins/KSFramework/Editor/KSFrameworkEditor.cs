@@ -106,10 +106,16 @@ Shorcuts:
                 foreach (var windowAsset in windowAssets)
                 {
                     var uiName = windowAsset.name;
-                    var scriptPath = string.Format("{0}/{1}/UI/UI{2}.lua", KResourceModule.EditorProductFullPath,
-                        luaPath, uiName);
+                    var scriptPath = string.Format("{0}/{1}/UI/{2}/{3}.lua", KResourceModule.EditorProductFullPath,
+                        luaPath, uiName,uiName);
                     if (!File.Exists(scriptPath))
                     {
+                        var scriptDir = Path.GetDirectoryName(scriptPath);
+                        if (!string.IsNullOrEmpty(scriptDir) && Directory.Exists(scriptDir) == false)
+                        {
+                            Directory.CreateDirectory(scriptDir);
+                        }
+
                         File.WriteAllText(scriptPath, LuaUITempalteCode.Replace("$UI_NAME", "UI" + uiName));
                         Debug.LogWarning("New Lua Script: " + scriptPath);
                     }
@@ -125,7 +131,8 @@ Shorcuts:
                 Debug.LogError("Not found any `UIWindowAsset` Component");
             }
         }
-
+#if SLUA
+ 
         /// <summary>
         /// UI Lua Scripts Tempalte Code
         /// </summary>
@@ -155,6 +162,38 @@ end
 
 return $UI_NAME
 ";
+#else
+        /// <summary>
+        /// UI Lua Scripts Tempalte Code
+        /// </summary>
+        private static string LuaUITempalteCode = @"
+local UIBase = import('UI/UIBase')
+
+if not Cookie then local Cookie = CS.KSFramework.Cookie end
+if not UIModule then local UIModule = CS.KSFramework.UI.UIModule end
+if not Log then Log = CS.KEngine.Log end
+
+local $UI_NAME = {}
+extends($UI_NAME, UIBase)
+
+-- create a ui instance
+function $UI_NAME.New(controller)
+    local newUI = new($UI_NAME)
+    newUI.Controller = controller
+    return newUI
+end
+
+function $UI_NAME:OnInit(controller)
+    Log.Info('$UI_NAME OnInit, do controls binding')
+end
+
+function $UI_NAME:OnOpen()
+    Log.Info('$UI_NAME OnOpen, do your logic')
+end
+
+return $UI_NAME
+";
+#endif
         [MenuItem("KEngine/UI(UGUI)/Reload UI Lua %&r")]
         public static void ReloadLuaCache()
         {
