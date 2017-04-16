@@ -14,7 +14,7 @@ end
 function TestLuaBehaivour:Update()
 
     if Time.frameCount % 100 == 0 then
-        Log.Info("Test Lua Behaivour Update!")
+        --Log.Info("Test Lua Behaivour Update!")
     end
 end
 
