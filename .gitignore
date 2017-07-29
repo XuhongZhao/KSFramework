@@ -246,5 +246,5 @@ _Pvt_Extensions
 /KSFramework/Product/**/*.meta
 *UnityVS*
 
-
+/KSFramework/Assets/StreamingAssets/*.*
 /KSFramework/Assets/StreamingAssets/Setting
