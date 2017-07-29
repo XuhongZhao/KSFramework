@@ -4,7 +4,6 @@ using System.Collections;
 using System.IO;
 using KEngine;
 using KEngine.UI;
-using SLua;
 using UnityEngine.UI;
 
 namespace KSFramework
@@ -18,7 +17,7 @@ namespace KSFramework
         /// 一般编辑器模式下用于reload时用，记录上一次OnOpen的参数
         /// </summary>
         public object[] LastOnOpenArgs { get; private set; }
-        LuaTable _luaTable;
+//        LuaTable _luaTable;
 
         /// <summary>
         /// Lua Script for this UI 's path
@@ -64,21 +63,21 @@ namespace KSFramework
             if (!CheckInitScript())
                 return;
 
-            var onOpenFuncObj = _luaTable["OnOpen"];
-            if (onOpenFuncObj == null)
-            {
-                Log.LogError("Not Exists `OnOpen` in lua: {0}", UITemplateName);
-                return;
-            }
-
-            var newArgs = new object[args.Length + 1];
-            newArgs[0] = _luaTable;
-            for (var i = 0; i < args.Length; i++)
-            {
-                newArgs[i + 1] = args[i];
-            }
-
-            (onOpenFuncObj as LuaFunction).call(newArgs);
+//            var onOpenFuncObj = _luaTable["OnOpen"];
+//            if (onOpenFuncObj == null)
+//            {
+//                Log.LogError("Not Exists `OnOpen` in lua: {0}", UITemplateName);
+//                return;
+//            }
+//
+//            var newArgs = new object[args.Length + 1];
+//            newArgs[0] = _luaTable;
+//            for (var i = 0; i < args.Length; i++)
+//            {
+//                newArgs[i + 1] = args[i];
+//            }
+//
+//            (onOpenFuncObj as LuaFunction).call(newArgs);
         }
 
         public override void OnClose()
@@ -86,11 +85,11 @@ namespace KSFramework
             base.OnClose();
             if (!CheckInitScript())
                 return;
-            var closeFunc = _luaTable["OnClose"];
-            if (closeFunc != null)
-            {
-                (closeFunc as LuaFunction).call(_luaTable);
-            }
+//            var closeFunc = _luaTable["OnClose"];
+//            if (closeFunc != null)
+//            {
+//                (closeFunc as LuaFunction).call(_luaTable);
+//            }
         }
 
         /// <summary>
@@ -119,42 +118,42 @@ namespace KSFramework
             }
 
             scriptResult = KSGame.Instance.LuaModule.CallScript(relPath);
-            Debuger.Assert(scriptResult is LuaTable, "{0} Script Must Return Lua Table with functions!", UITemplateName);
-
-            _luaTable = scriptResult as LuaTable;
-
-            var newFuncObj = _luaTable["New"]; // if a New function exist, new a table!
-            if (newFuncObj != null)
-            {
-                var newTableObj = (newFuncObj as LuaFunction).call(this);
-                _luaTable = newTableObj as LuaTable;
-            }
-
-            var outlet = this.GetComponent<UILuaOutlet>();
-            if (outlet != null)
-            {
-                for (var i = 0; i < outlet.OutletInfos.Count; i++)
-                {
-                    var outletInfo = outlet.OutletInfos[i];
-
-                    var gameObj = outletInfo.Object as GameObject;
-
-                    if (gameObj != null)
-                        _luaTable[outletInfo.Name] = gameObj.GetComponent(outletInfo.ComponentType);
-                    else
-                        _luaTable[outletInfo.Name] = outletInfo.Object;
-                }
-
-            }
-
-
-            var luaInitObj = _luaTable["OnInit"];
-            Debuger.Assert(luaInitObj is LuaFunction, "Must have OnInit function - {0}", UIName);
-
-            // set table variable `Controller` to this
-            _luaTable["Controller"] = this;
-
-            (luaInitObj as LuaFunction).call(_luaTable, this);
+//            Debuger.Assert(scriptResult is LuaTable, "{0} Script Must Return Lua Table with functions!", UITemplateName);
+//
+//            _luaTable = scriptResult as LuaTable;
+//
+//            var newFuncObj = _luaTable["New"]; // if a New function exist, new a table!
+//            if (newFuncObj != null)
+//            {
+//                var newTableObj = (newFuncObj as LuaFunction).call(this);
+//                _luaTable = newTableObj as LuaTable;
+//            }
+//
+//            var outlet = this.GetComponent<UILuaOutlet>();
+//            if (outlet != null)
+//            {
+//                for (var i = 0; i < outlet.OutletInfos.Count; i++)
+//                {
+//                    var outletInfo = outlet.OutletInfos[i];
+//
+//                    var gameObj = outletInfo.Object as GameObject;
+//
+//                    if (gameObj != null)
+//                        _luaTable[outletInfo.Name] = gameObj.GetComponent(outletInfo.ComponentType);
+//                    else
+//                        _luaTable[outletInfo.Name] = outletInfo.Object;
+//                }
+//
+//            }
+//
+//
+//            var luaInitObj = _luaTable["OnInit"];
+//            Debuger.Assert(luaInitObj is LuaFunction, "Must have OnInit function - {0}", UIName);
+//
+//            // set table variable `Controller` to this
+//            _luaTable["Controller"] = this;
+//
+//            (luaInitObj as LuaFunction).call(_luaTable, this);
 
             return true;
         }
@@ -193,7 +192,7 @@ namespace KSFramework
         /// </summary>
         public void ClearLuaTableCache()
         {
-            _luaTable = null;
+//            _luaTable = null;
 
             var luaModule = KSGame.Instance.LuaModule;
             luaModule.ClearCache(UILuaPath);

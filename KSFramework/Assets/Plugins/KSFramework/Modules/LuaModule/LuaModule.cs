@@ -28,14 +28,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using KEngine;
-using LuaInterface;
-using SLua;
+
 
 namespace KSFramework
 {
     public class LuaModule : IModuleInitable
     {
-        private readonly LuaSvr _luaSvr;
+//        private readonly LuaSvr _luaSvr;
 
         public static LuaModule Instance = new LuaModule();
 
@@ -43,12 +42,17 @@ namespace KSFramework
 
         private double _initProgress = 0;
 
+        public IEnumerator Init()
+        {
+            throw new NotImplementedException();
+        }
+
         public double InitProgress { get { return _initProgress; }}
 
-        public LuaState State
-        {
-            get { return _luaSvr.luaState; }
-        }
+//        public LuaState State
+//        {
+//            get { return _luaSvr.luaState; }
+//        }
 
 		/// <summary>
 		/// 是否开启缓存模式，默认true，首次执行将把执行结果table存起来；在非缓存模式下，也可以通过编辑器的Reload来进行强制刷新缓存
@@ -69,8 +73,8 @@ namespace KSFramework
 #if UNITY_EDITOR
             UnityEngine.Debug.Log("Consturct LuaModule...");
 #endif
-            _luaSvr = new LuaSvr();
-            _luaSvr.init(progress => { _initProgress = progress; }, () => { });
+//            _luaSvr = new LuaSvr();
+//            _luaSvr.init(progress => { _initProgress = progress; }, () => { });
         }
 
         /// <summary>
@@ -81,7 +85,9 @@ namespace KSFramework
         /// <returns></returns>
         public bool ExecuteScript(byte[] scriptCode, out object ret)
         {
-            return _luaSvr.luaState.doBuffer(scriptCode, Encoding.UTF8.GetString(scriptCode), out ret);
+//            return _luaSvr.luaState.doBuffer(scriptCode, Encoding.UTF8.GetString(scriptCode), out ret);
+            ret=new object();
+            return true;
         }
 
         /// <summary>
@@ -217,124 +223,124 @@ namespace KSFramework
             return _importCache.Remove(uiLuaPath);
         }
 
-        public IEnumerator Init()
-        {
-            int frameCount = 0;
-            while (!_luaSvr.inited)
-            {
-                if (frameCount % 30 == 0)
-                    Log.LogWarning("SLua Initing...");
-                yield return null;
-                frameCount++;
-            }
-
-            var L = _luaSvr.luaState.L;
-            LuaDLL.lua_pushcfunction(L, LuaImport);
-            LuaDLL.lua_setglobal(L, "import");
-            LuaDLL.lua_pushcfunction(L, LuaUsing);
-            LuaDLL.lua_setglobal(L, "using"); // same as SLua's import, using namespace
-            LuaDLL.lua_pushcfunction(L, ImportCSharpType);
-            LuaDLL.lua_setglobal(L, "import_type"); // same as SLua's SLua.GetClass(), import C# type
-            CallScript("Init");
-
-            IsInited = true;
-        }
-
-		[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
-		static public int ImportCSharpType(IntPtr l)
-		{
-			try
-			{
-				string cls;
-				Helper.checkType(l, 1, out cls);
-				Type t = LuaObject.FindType(cls);
-				if (t == null)
-				{
-					return Helper.error(l, "Can't find {0} to create", cls);
-				}
-
-				LuaClassObject co = new LuaClassObject(t);
-				LuaObject.pushObject(l,co);
-				Helper.pushValue(l, true);
-				return 2;
-			}
-			catch (Exception e)
-			{
-				return Helper.error(l, e);
-			}
-		}
-        /// <summary>
-        /// same as SLua default import
-        /// </summary>
-        /// <param name="luastate"></param>
-        /// <returns></returns>
-        [MonoPInvokeCallback(typeof(LuaCSFunction))]
-        private int LuaUsing(IntPtr l)
-        {
-            try
-            {
-                LuaDLL.luaL_checktype(l, 1, LuaTypes.LUA_TSTRING);
-                string str = LuaDLL.lua_tostring(l, 1);
-
-                string[] ns = str.Split('.');
-
-                LuaDLL.lua_pushglobaltable(l);
-
-                for (int n = 0; n < ns.Length; n++)
-                {
-                    LuaDLL.lua_getfield(l, -1, ns[n]);
-                    if (!LuaDLL.lua_istable(l, -1))
-                    {
-                        return LuaObject.error(l, "expect {0} is type table", ns);
-                    }
-                    LuaDLL.lua_remove(l, -2);
-                }
-
-                LuaDLL.lua_pushnil(l);
-                while (LuaDLL.lua_next(l, -2) != 0)
-                {
-                    string key = LuaDLL.lua_tostring(l, -2);
-                    LuaDLL.lua_getglobal(l, key);
-                    if (!LuaDLL.lua_isnil(l, -1))
-                    {
-                        LuaDLL.lua_pop(l, 1);
-                        return LuaObject.error(l, "{0} had existed, import can't overload it.", key);
-                    }
-                    LuaDLL.lua_pop(l, 1);
-                    LuaDLL.lua_setglobal(l, key);
-                }
-
-                LuaDLL.lua_pop(l, 1);
-
-                LuaObject.pushValue(l, true);
-                return 1;
-            }
-            catch (Exception e)
-            {
-                return LuaObject.error(l, e);
-            }
-        }
-
-        /// <summary>
-        /// This will override SLua default `import`
-        /// 
-        /// TODO: cache the result!
-        /// </summary>
-        /// <param name="l"></param>
-        /// <returns></returns>
-        [MonoPInvokeCallback(typeof(LuaCSFunction))]
-        internal static int LuaImport(IntPtr L)
-        {
-            LuaModule luaModule = Instance;
-
-            string fileName = LuaDLL.lua_tostring(L, 1);
-            var obj = luaModule.Import(fileName);
-
-            LuaObject.pushValue(L, obj);
-            LuaObject.pushValue(L, true);
-            return 2;
-
-        }
+//        public IEnumerator Init()
+//        {
+//            int frameCount = 0;
+//            while (!_luaSvr.inited)
+//            {
+//                if (frameCount % 30 == 0)
+//                    Log.LogWarning("SLua Initing...");
+//                yield return null;
+//                frameCount++;
+//            }
+//
+//            var L = _luaSvr.luaState.L;
+//            LuaDLL.lua_pushcfunction(L, LuaImport);
+//            LuaDLL.lua_setglobal(L, "import");
+//            LuaDLL.lua_pushcfunction(L, LuaUsing);
+//            LuaDLL.lua_setglobal(L, "using"); // same as SLua's import, using namespace
+//            LuaDLL.lua_pushcfunction(L, ImportCSharpType);
+//            LuaDLL.lua_setglobal(L, "import_type"); // same as SLua's SLua.GetClass(), import C# type
+//            CallScript("Init");
+//
+//            IsInited = true;
+//        }
+//
+//		[MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+//		static public int ImportCSharpType(IntPtr l)
+//		{
+//			try
+//			{
+//				string cls;
+//				Helper.checkType(l, 1, out cls);
+//				Type t = LuaObject.FindType(cls);
+//				if (t == null)
+//				{
+//					return Helper.error(l, "Can't find {0} to create", cls);
+//				}
+//
+//				LuaClassObject co = new LuaClassObject(t);
+//				LuaObject.pushObject(l,co);
+//				Helper.pushValue(l, true);
+//				return 2;
+//			}
+//			catch (Exception e)
+//			{
+//				return Helper.error(l, e);
+//			}
+//		}
+//        /// <summary>
+//        /// same as SLua default import
+//        /// </summary>
+//        /// <param name="luastate"></param>
+//        /// <returns></returns>
+//        [MonoPInvokeCallback(typeof(LuaCSFunction))]
+//        private int LuaUsing(IntPtr l)
+//        {
+//            try
+//            {
+//                LuaDLL.luaL_checktype(l, 1, LuaTypes.LUA_TSTRING);
+//                string str = LuaDLL.lua_tostring(l, 1);
+//
+//                string[] ns = str.Split('.');
+//
+//                LuaDLL.lua_pushglobaltable(l);
+//
+//                for (int n = 0; n < ns.Length; n++)
+//                {
+//                    LuaDLL.lua_getfield(l, -1, ns[n]);
+//                    if (!LuaDLL.lua_istable(l, -1))
+//                    {
+//                        return LuaObject.error(l, "expect {0} is type table", ns);
+//                    }
+//                    LuaDLL.lua_remove(l, -2);
+//                }
+//
+//                LuaDLL.lua_pushnil(l);
+//                while (LuaDLL.lua_next(l, -2) != 0)
+//                {
+//                    string key = LuaDLL.lua_tostring(l, -2);
+//                    LuaDLL.lua_getglobal(l, key);
+//                    if (!LuaDLL.lua_isnil(l, -1))
+//                    {
+//                        LuaDLL.lua_pop(l, 1);
+//                        return LuaObject.error(l, "{0} had existed, import can't overload it.", key);
+//                    }
+//                    LuaDLL.lua_pop(l, 1);
+//                    LuaDLL.lua_setglobal(l, key);
+//                }
+//
+//                LuaDLL.lua_pop(l, 1);
+//
+//                LuaObject.pushValue(l, true);
+//                return 1;
+//            }
+//            catch (Exception e)
+//            {
+//                return LuaObject.error(l, e);
+//            }
+//        }
+//
+//        /// <summary>
+//        /// This will override SLua default `import`
+//        /// 
+//        /// TODO: cache the result!
+//        /// </summary>
+//        /// <param name="l"></param>
+//        /// <returns></returns>
+//        [MonoPInvokeCallback(typeof(LuaCSFunction))]
+//        internal static int LuaImport(IntPtr L)
+//        {
+//            LuaModule luaModule = Instance;
+//
+//            string fileName = LuaDLL.lua_tostring(L, 1);
+//            var obj = luaModule.Import(fileName);
+//
+//            LuaObject.pushValue(L, obj);
+//            LuaObject.pushValue(L, true);
+//            return 2;
+//
+//        }
 
     }
 

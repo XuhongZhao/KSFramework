@@ -2,7 +2,6 @@
 using UnityEngine;
 using System.Collections;
 using KEngine;
-using SLua;
 
 public static class LuaBehaivourExtensions
 {
@@ -21,7 +20,7 @@ namespace KSFramework
     {
         public string LuaPath = null;
 
-        private LuaTable _cacheTable;
+//        private LuaTable _cacheTable;
 
         public static LuaBehaviour Create(GameObject attach, string luaPath)
         {
@@ -44,31 +43,31 @@ namespace KSFramework
 
         public void Reload()
         {
-            _cacheTable = null;
-            var ret = LuaModule.Instance.CallScript(LuaPath);
-            Debuger.Assert(ret is LuaTable, "{0} Script Must Return Lua Table with functions!", LuaPath);
-            _cacheTable = ret as LuaTable;
+//            _cacheTable = null;
+//            var ret = LuaModule.Instance.CallScript(LuaPath);
+//            Debuger.Assert(ret is LuaTable, "{0} Script Must Return Lua Table with functions!", LuaPath);
+//            _cacheTable = ret as LuaTable;
         }
 
         public object CallLuaFunction(string function, params object[] args)
         {
-            if (!LuaModule.CacheMode)
-                Reload();
-            if (_cacheTable == null)
-                throw new Exception(string.Format("{0}: cannot get table!", LuaPath));
-
-            var retFunc = _cacheTable[function];
-            if (retFunc != null)
-            {
-                if (!(retFunc is LuaFunction))
-                {
-                    throw new Exception(string.Format("{0}: {1} must be function!", LuaPath, function));
-                }
-
-                var func = retFunc as LuaFunction;
-
-                return func.call(args);
-            }
+//            if (!LuaModule.CacheMode)
+//                Reload();
+//            if (_cacheTable == null)
+//                throw new Exception(string.Format("{0}: cannot get table!", LuaPath));
+//
+//            var retFunc = _cacheTable[function];
+//            if (retFunc != null)
+//            {
+//                if (!(retFunc is LuaFunction))
+//                {
+//                    throw new Exception(string.Format("{0}: {1} must be function!", LuaPath, function));
+//                }
+//
+//                var func = retFunc as LuaFunction;
+//
+//                return func.call(args);
+//            }
 
             return null;
         }
@@ -78,7 +77,7 @@ namespace KSFramework
             if (!string.IsNullOrEmpty(LuaPath))
             {
                 Init();
-				CallLuaFunction("Awake", _cacheTable, this);
+//				CallLuaFunction("Awake", _cacheTable, this);
             } // else Null Lua Path, pass Awake!
         }
 
@@ -99,7 +98,7 @@ namespace KSFramework
 
 		protected void OnDestroy()
 		{
-			CallLuaFunction ("OnDestroy", _cacheTable, this);
+//			CallLuaFunction ("OnDestroy", _cacheTable, this);
 		}
     }
 
