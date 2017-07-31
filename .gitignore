@@ -241,7 +241,11 @@ _Pvt_Extensions
 /KSFramework/Assets/SLua/LuaObject
 /KSFramework/Assets/UnityTestTools
 /KSFramework/Assets/StreamingAssets/Bundles
+/KSFramework/Assets/StreamingAssets/Bundles.meta
 /KSFramework/Assets/StreamingAssets/Lua
+/KSFramework/Assets/StreamingAssets/Lua.meta
 /KSFramework/Assets/StreamingAssets/Setting
+/KSFramework/Assets/StreamingAssets/Setting.meta
 /KSFramework/Product/**/*.meta
 *UnityVS*
+*.ffs_db
